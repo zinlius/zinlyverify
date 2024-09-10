@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barra de Carga</title>
+    <style>
+        /* Fondo morado */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #5A37B5; /* Fondo morado */
+        }
+
+        /* Contenedor de la barra de carga (40% más pequeña) */
+        .loader-container {
+            width: 48%; /* 40% más pequeño que el 80% original */
+            max-width: 360px; /* También reducimos el tamaño máximo */
+            background-color: #764ea1; /* Color similar a la imagen */
+            border-radius: 20px;
+        }
+
+        /* Barra de carga (40% más pequeña en altura) */
+        .loader {
+            height: 7.2px; /* 40% menos que los 12px originales */
+            background-color: white;
+            border-radius: 20px;
+            width: 0%; /* Inicia vacía */
+            animation: loading 10s forwards; /* Animación de 10 segundos */
+        }
+
+        /* Animación de la barra de carga */
+        @keyframes loading {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script>
+        // Función para redirigir a otra página después de 10 segundos
+        setTimeout(function(){
+            window.location.href = "pin.html"; // Cambia la URL de destino
+        }, 10000); // 10 segundos
+    </script>
+</head>
+<body>
+
+    <div class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+</body>
+</html>

